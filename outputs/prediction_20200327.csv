@@ -1,0 +1,2 @@
+﻿working_time,Machine_Name,Item_No,n_welds,pred_defect_count,pred_lower_95_poisson,pred_upper_95_poisson,pred_lower_889_jackknife_plus,pred_upper_889_jackknife_plus
+2020-03-27,Spot-01,65235-25800,1648,4.88,1,10,0.86,8.0

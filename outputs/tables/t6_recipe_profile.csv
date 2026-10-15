@@ -1,0 +1,5 @@
+﻿recipe,weld force(bar)_mean,weld force(bar)_std,weld force(bar)_size,weld current(kA)_mean,weld current(kA)_std,weld current(kA)_size,weld Voltage(v)_mean,weld Voltage(v)_std,weld Voltage(v)_size,weld time(ms)_mean,weld time(ms)_std,weld time(ms)_size
+A_주모드(~3bar),2.3383,0.0537,10775,14.697,0.0892,10775,2.702,0.009,10775,71.7255,0.6328,10775
+T_전이(3-5bar),3.9504,0.5457,192,14.8131,0.0653,192,2.7746,0.0309,192,71.8125,0.6021,192
+B_고압(5-9bar),7.4339,0.8173,916,14.8526,0.0924,916,2.727,0.0489,916,71.6943,0.6363,916
+C_극고압(9bar+),9.3121,0.5142,56,14.7736,0.0345,56,2.5131,0.0968,56,71.6429,0.4835,56

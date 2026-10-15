@@ -1,0 +1,27 @@
+# 제6회 K-인공지능 제조데이터 분석 경진대회 — ② 용접기 AI 데이터셋
+#
+# 실제로 import 하는 패키지만 적는다(간접 의존성은 pip 이 함께 설치).
+# pip freeze 전량을 싣지 않은 이유: 재현에 필요한 것과 가상환경에 우연히
+# 들어 있던 것을 구분해야 심사위원이 최소 환경으로 재현할 수 있다.
+#
+# 설치:  python3.11 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
+# 실행:  bash run_all.sh
+#
+# 검증 환경: Python 3.11 (macOS / Linux). GPU·외부 서비스를 쓰지 않는다.
+
+# --- 분석 본체 (01~25 전부) ---
+numpy==2.4.6
+pandas==3.0.6
+scipy==1.17.1
+scikit-learn==1.9.1
+statsmodels==0.15.0
+
+# --- 입출력·시각화 ---
+openpyxl==3.1.5          # Welding Data Set_01.xlsx 읽기
+matplotlib==3.11.2       # 그림 생성
+tabulate==0.10.0         # DataFrame.to_markdown() — outputs/tables/*.md 생성에 필수
+
+# --- 발표자료 생성 (10_build_slides.py) ---
+# run_all.sh 에는 포함하지 않는다(분석 산출물이 아니므로).
+# 발표자료를 다시 만들 때만 필요하다.
+python-pptx==1.0.2

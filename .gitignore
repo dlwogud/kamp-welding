@@ -1,0 +1,21 @@
+# 가상환경
+.venv/
+__pycache__/
+*.pyc
+
+# 대회 제공 원본 데이터 — 재배포 권한 불확실. data/raw/README.md 참조
+data/raw/*.xlsx
+data/raw/*.csv
+data/external/
+
+# 빌드 산출물
+submission/*.zip
+
+# 팀 내부 문서
+인수인계.md
+
+# 실행 상태 파일
+outputs/.run_start
+
+# OS
+.DS_Store
