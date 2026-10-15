@@ -139,8 +139,8 @@ kamp-welding-src/                 (제출 패키지의 최상위)
 │   └── 10_build_slides.py        발표자료 생성 (run_all.sh 제외)
 │
 └── outputs/
-    ├── tables/                   표 104종 (csv + md)
-    ├── figures/                  그림 40종 (png)
+    ├── tables/                   표 106종 (csv + md)
+    ├── figures/                  그림 41종 (png)
     ├── run_manifest.json         ★ 산출물 진위·SHA-256 (25가 생성)
     ├── weld_anomaly_scores.csv   ★ 최종 이상점수·컨포멀 p값 (11,939행)
     ├── weld_scores_lodo.csv      복제 구간 제외·LODO 채점본 (8,739행)
@@ -150,7 +150,7 @@ kamp-welding-src/                 (제출 패키지의 최상위)
 ```
 
 결과보고서 본문에서 추출한 검증 대상은 산출물 94개(검사기 자체 산출물 3개 제외)이고,
-`outputs/` 에는 중간 산출물까지 포함해 표 104종·그림 40종이 남는다.
+`outputs/` 에는 중간 산출물까지 포함해 표 106종·그림 41종이 남는다.
 
 결과보고서·발표자료는 별도 제출물이므로 본 소스 패키지에 포함하지 않는다.
 

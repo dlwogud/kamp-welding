@@ -50,6 +50,8 @@ run 19_simulation.py          # 시뮬레이션 검증              -> 제2.10�
 run 22_external_press.py      # 외부 검증 (1) 이상탐지       -> 부록 A.1
 run 23_external_mold.py       # 외부 검증 (2) LLP 주장       -> 부록 A.2
 run 04_naive_check.py         # 전가 라벨 대조 분석          -> 제2.11절 (가장 오래 걸림)
+run 28_feature_sweep.py       # 전수 특징 쓸이 (제출 후 추가)   -> README
+
 
 # 종료 조건 (1) — 본문 표에 옮겨 적은 숫자가 출처 csv 의 값과 같은지 대조한다.
 run 27_verify_report.py       # 보고서 수치 대조              -> 제6.5절

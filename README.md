@@ -7,6 +7,66 @@
 
 저항점용접(RSW) 공정데이터 분석. 제6회 K-인공지능 제조데이터 분석 경진대회 제출물.
 
+<details>
+<summary><b>In English</b> — resistance spot welding, process anomaly detection under label-resolution mismatch</summary>
+
+<br>
+
+The dataset pairs **11,939 weld-point process records** with **defect labels aggregated to
+8 workdays (39 counts total)**. There is no key to join them per weld point, so **no
+point-level ground truth exists.** Imputing day labels onto points produces ROC-AUC 0.586
+under row-random splits and **0.305 under workday-grouped splits** — worse than chance.
+The apparent performance is leakage, not discrimination.
+
+So the prediction target was redefined to match label resolution:
+
+| Task | Final model | Performance | Validated against |
+|---|---|---|---|
+| Daily defect count | Intercept-only baseline (best of 4) | LOO-MAE **1.536**; held-out day → **4.88** (95% PI [1, 10]) | real defect counts (39) |
+| Weld-point anomaly detection | kNN distance (k=3), physics-derived space [force, dynamic resistance, heat input] | mean ROC-AUC **0.971**, worst-case **0.954** across 7 fault modes | **synthetic** faults |
+| External reproducibility | same configuration, **no retuning** | ROC-AUC **0.899**, 1st of 9 models | real anomaly labels (other dataset) |
+| Normal-operation model | force → current | LODO R² **0.509** | real operation |
+| Day-level process monitoring | 2σ control chart on daily median force | 3/3 shifts flagged, 0/5 false alarms, exact permutation **p = 0.0179** | real operation |
+
+**0.971 is sensitivity to faults we injected, not a real defect detection rate.** Linking the
+anomaly scores to the 39 real defects was tested across 6 daily aggregates: **all 5 testable
+ones were non-significant** (min permutation p 0.651). Reported as *undecidable with the
+current sample*, not as *no effect*.
+
+Three findings worth noting:
+
+1. **26.8% of the data is duplicated.** An 800-point run matching to the last significant
+   digit across all four process variables recurs on four workdays (one workday is entirely
+   this run). Found by row-hashing plus longest-common-run, with no prior threshold. Excluding
+   it fully **reversed an earlier conclusion** (4/4 → 0/3 detections — the earlier result had
+   been detecting the artifact).
+2. **A classical control chart beat the sophisticated detector.** kNN + conformal + CUSUM
+   sequential monitoring caught 0/3 real process shifts; a 2σ chart on daily median force
+   caught 3/3. The real anomaly is a day-level level shift, not point-wise outliers.
+3. **Point-level prediction is infeasible here, shown five ways** — learning from label
+   proportions (5 bags → minimum attainable exact p is 0.05), simulation (a *planted* true
+   relationship is not recovered: AUC 0.40–0.52 even at 50 bags, given the 0.347% defect
+   rate), external data (label resolution alone costs 0.958 → 0.627), correlation with the
+   39 real defects, and forcing the imputed-label classifier.
+
+**Reproducibility is enforced in code.** `bash run_all.sh` regenerates everything (~150 min).
+The final two stages are exit conditions: one cross-checks every number in the report tables
+against its source CSV; the other **derives the expected-artifact list from the report itself**,
+then verifies each artifact's mtime and SHA-256 — exiting non-zero on any stale or missing
+file. Before submission, `outputs/` was emptied and the pipeline re-run: **94 artifacts, all
+FRESH, verdict PASS.**
+
+That machinery exists because the same class of mistake happened three times — a wrong count
+propagated across several documents, then "confirmed" by checking the documents against each
+other. **Cross-document consistency makes errors consistent, not correct.** The source of
+truth has to be the artifact.
+
+Raw data is **not** included (redistribution rights unclear) — see `data/raw/README.md`.
+`outputs/` holds all 104 tables and 40 figures, so results are inspectable without it.
+Code and documentation are MIT licensed. Reports are in Korean.
+
+</details>
+
 ---
 
 ## 핵심 발견 세 가지
@@ -98,6 +158,38 @@
 n=8의 한계도 명시한다. Spearman 순열 귀무분포의 95% 범위가 **[−0.71, +0.72]**여서
 **ρ = 0.7도 우연과 구분되지 않는다.** 80% 검정력으로 검출 가능한 최소 상관은 |ρ| ≥ 0.87이다.
 
+### 전수 쓸이 — "충분히 찾아봤는가"에 대한 답
+
+> ⚠️ [`28_feature_sweep.py`](src/28_feature_sweep.py)는 **대회 제출 이후에 추가**했다.
+> 제출된 보고서 본문에는 포함되어 있지 않다.
+>
+> `report/결과보고서_본문.md` 는 **제출 당시 상태를 그대로 보존**한다(표 104종 · 그림 40종
+> 기준). 스크립트 28이 표 2종·그림 1종을 추가해 현재 `outputs/` 에는 표 106종 · 그림 41종이
+> 있으므로, 보고서의 그 수치는 제출 시점 기준으로 읽어야 한다. 보고서를 사후 수정해
+> 제출본과 다르게 만들지 않았다.
+
+보고서의 제2.7·3.1절은 **사전지정 가설**만 검정했다(물리적 근거가 있는 후보 + Holm 보정).
+사전지정은 다중검정을 통제하는 올바른 설계지만, "혹시 놓친 특징이 있는가"에는 답하지 못한다.
+그래서 사후적으로 일 단위 집계 특징을 전수 생성해 전부 검정했다.
+
+| 타깃 | 작업일 | 검정 특징 | 최대 \|ρ\| | 그 특징 | 최소 순열 p | 보정 전 p<0.05 |
+|---|---|---|---|---|---|---|
+| 용접부족 | 8 | 37 | 0.404 | 생산량 | 0.304 | **0** |
+| 크랙발생 | 7 | 37 | 0.463 | 전류 IQR | 0.327 | **0** |
+| **파임불량** | 8 | 37 | **0.717** | 전류 표준편차 | **0.055** | **0** |
+| 합계 | 8 | 37 | 0.583 | 가압력 변동계수 | 0.133 | **0** |
+
+**총 148건 검정, 다중검정 보정 전 기준으로도 유의한 조합이 0건이다.**
+
+가장 큰 것은 **파임불량 ~ 전류 산포 ρ = 0.717**이다. 전류가 흔들리면 입열이 불균일해져
+파임이 생긴다는 물리적 설명이 가능하지만, **p = 0.055이고 순열 귀무분포 95% 상한이
+0.72다.** 관측값이 그 경계에 그대로 앉아 있다. 148번 검정했으면 이 수준은 우연히 여러 번
+나온다. **발견으로 제시하지 않는다.**
+
+![전수 쓸이](outputs/figures/f33_feature_sweep.png)
+
+이 결과는 **"신호가 없다"가 아니라 "n=8에서 검출 가능한 범위에 신호가 없다"**로 읽어야 한다.
+
 ---
 
 ## 재현성 — 검증을 코드로 강제한다
@@ -143,12 +235,14 @@ bash run_all.sh          # 약 150분, outputs/ 전부 재생성
 ├── docs/
 │   ├── RUNNING.md             실행 방법 상세
 │   └── PROGRESS.md            작업 이력 · 자체 발견하고 정정한 오류 21건
-├── src/                       분석 스크립트 28개
+├── notebooks/
+│   └── summary.ipynb          핵심 결과 요약 (실행 결과 포함 — 깃헙에서 바로 보임)
+├── src/                       분석 스크립트 29개
 ├── data/raw/README.md         원본 데이터 받는 방법
 ├── run_all.sh                 전체 파이프라인 (26개 스크립트 등록)
 └── outputs/
-    ├── tables/                표 104종 (csv + md) — 본문 수치의 출처
-    ├── figures/               그림 40종
+    ├── tables/                표 106종 (csv + md) — 본문 수치의 출처
+    ├── figures/               그림 41종
     ├── run_manifest.json      산출물 진위 · SHA-256
     ├── prediction_20200327.csv    테스트일 예측결과
     └── weld_anomaly_scores.csv    용접점별 이상점수·컨포멀 p값 (11,939행)
